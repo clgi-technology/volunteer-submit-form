@@ -82,6 +82,7 @@ Tally will substitute the @Field Name values with real form responses.
 
 🔧 GitHub Action: .github/workflows/handle-dispatch.yml
 
+```
 name: Handle Volunteer Submission
 
 on:
@@ -124,11 +125,12 @@ jobs:
           CLICKSEND_USERNAME: ${{ secrets.CLICKSEND_USERNAME }}
           CLICKSEND_API_KEY: ${{ secrets.CLICKSEND_API_KEY }}
 
-
+```
 ⸻
 
 🐍 scripts/process_submission.py
 
+```
 import sys
 import json
 import yaml
@@ -160,11 +162,12 @@ data.append(entry)
 with open(file_path, 'w') as f:
     yaml.dump(data, f)
 
-
+```
 ⸻
 
 📲 scripts/send_clicksend_sms.py
 
+```
 import sys
 import json
 import os
@@ -198,14 +201,15 @@ response = requests.post(
 
 print("ClickSend response:", response.text)
 
-
+```
 ⸻
 
 📄 requirements.txt
 
+```
 pyyaml
 requests
-
+```
 
 ⸻
 
