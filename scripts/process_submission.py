@@ -27,7 +27,8 @@ def export_json(schedule):
                 "date": shift.get('date'),
                 "time": shift.get('time'),
                 "volunteer": vol.get('name'),
-                "role": shift.get('role')
+                "role": shift.get('role'),
+                "event": shift.get('event') or ""   # Include event name, fallback empty string
             })
     with open(SCHEDULE_JSON, 'w') as f:
         json.dump(json_data, f, indent=2)
@@ -39,20 +40,22 @@ def parse_payload(payload):
 
     shifts = []
 
-    # Preferred: structured shifts list
+    # Preferred: structured list of shifts
     if 'shifts' in payload and isinstance(payload['shifts'], list):
         for s in payload['shifts']:
             date = s.get('date')
             time = s.get('time')
             role = s.get('role') or s.get('position_title')
+            event = s.get('event') or s.get('event_name') or ""
             if date and time and role:
-                shifts.append({'date': date, 'time': time, 'role': role})
+                shifts.append({'date': date, 'time': time, 'role': role, 'event': event})
 
     else:
-        # Fallback: single shift
+        # Fallback: single shift with possibly multiple roles comma-separated
         date = payload.get('date')
         time = payload.get('time')
         roles = payload.get('position_title')
+        event = payload.get('event_name') or ""
 
         if isinstance(roles, str):
             roles = [r.strip() for r in roles.split(',') if r.strip()]
@@ -61,7 +64,7 @@ def parse_payload(payload):
 
         for role in roles:
             if date and time and role:
-                shifts.append({'date': date, 'time': time, 'role': role})
+                shifts.append({'date': date, 'time': time, 'role': role, 'event': event})
 
     if not (name and shifts):
         sys.exit("❌ Missing required volunteer name or shift data.")
@@ -95,11 +98,14 @@ def main():
             try:
                 date_part, rest = shift_line.split(',', 1)
                 time_part, role_part = rest.split('–', 1)
-                shifts.append({
-                    'date': date_part.strip(),
-                    'time': time_part.strip(),
-                    'role': role_part.strip()
-                })
+                roles = [r.strip() for r in role_part.split(',') if r.strip()]
+                for role in roles:
+                    shifts.append({
+                        'date': date_part.strip(),
+                        'time': time_part.strip(),
+                        'role': role,
+                        'event': ""  # No event data from CLI fallback
+                    })
             except ValueError:
                 continue
 
@@ -108,7 +114,7 @@ def main():
 
     schedule = load_schedule()
 
-    # Remove duplicates for same volunteer (optional logic)
+    # Remove any existing entries for this volunteer (match by name and phone)
     schedule = [v for v in schedule if not (v.get('name') == name and v.get('phone') == phone)]
 
     new_volunteer = {
