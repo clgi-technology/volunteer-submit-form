@@ -25,12 +25,12 @@ jobs:
       - name: Debug: Print received payload
         run: |
           echo "=== DEBUG: Received client_payload ==="
-          echo '${{ toJson(github.event.client_payload) }}'
+          echo "${{ toJson(github.event.client_payload) }}"
           echo "====================================="
 
       - name: Process volunteer submission
         run: |
-          python scripts/process_submission.py --payload-json '${{ toJson(github.event.client_payload) }}'
+          python scripts/process_submission.py --payload-json "${{ toJson(github.event.client_payload) }}"
 
       - name: Regenerate calendar page
         run: |
