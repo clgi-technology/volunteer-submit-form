@@ -22,15 +22,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml clicksend-client
 
-      - name: Debug: Print received payload
+      - name: Debug - Show event payload
         run: |
-          echo "=== DEBUG: Received client_payload ==="
+          echo "Payload:"
           echo "${{ toJson(github.event.client_payload) }}"
-          echo "====================================="
 
       - name: Process volunteer submission
+        env:
+          PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: |
-          python scripts/process_submission.py --payload-json "${{ toJson(github.event.client_payload) }}"
+          python scripts/process_submission.py --payload-json "$PAYLOAD"
 
       - name: Regenerate calendar page
         run: |
