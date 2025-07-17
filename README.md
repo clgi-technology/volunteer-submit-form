@@ -20,6 +20,14 @@ volunteer-submit-form/
 
 ```
 
+## 📒 Notes
+
+- `.github/workflows/handle-dispatch.yml` — GitHub Action triggered by `repository_dispatch`
+- `scripts/` — Python utilities that run inside the GitHub Action
+- `examples/` — Holds test payloads for easy reuse or local testing
+- `Makefile` — Sends form data to GitHub via `curl`
+- `volunteer_input.yaml` — Appended file of all volunteer submissions
+
 ---
 ## 🚀 How It Works
 
