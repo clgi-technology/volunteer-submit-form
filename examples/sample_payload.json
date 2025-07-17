@@ -1,0 +1,13 @@
+{
+  "event_type": "volunteer_submission",
+  "client_payload": {
+    "volunteer_name": "Sister Jane Doe",
+    "event_name": "Sunday Service",
+    "position_title": "Usher",
+    "date": "2025-08-04",
+    "time": "11:00 AM",
+    "email": "sister.jane@example.com",
+    "phone": "+15555555555",
+    "notify_sms": "true"
+  }
+}
