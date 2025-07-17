@@ -1,13 +1,14 @@
 {
   "event_type": "volunteer_submission",
   "client_payload": {
-    "volunteer_name": "Sister Jane Doe",
-    "event_name": "Sunday Service",
+    "volunteer_name": "Pastor Alice Smith",
+    "event_name": "Youth Revival",
     "position_title": "Usher",
-    "date": "2025-08-04",
-    "time": "11:00 AM",
-    "email": "sister.jane@example.com",
-    "phone": "+15555555555",
+    "date": "2025-08-15",
+    "year": "2025",
+    "time": "10:00 AM",
+    "phone": "+15551234567",
+    "email": "alice@example.com",
     "notify_sms": "true"
   }
 }
