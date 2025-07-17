@@ -2,7 +2,6 @@ import sys
 import argparse
 import yaml
 import json
-import re
 from datetime import datetime
 
 SCHEDULE_YAML = 'volunteer_input.yaml'
@@ -40,22 +39,24 @@ def parse_payload(payload):
 
     date = payload.get('date') or ""
     time = payload.get('time') or ""
-    role = payload.get('position_title') or ""
+    roles = payload.get('position_title')
 
-    if not (name and date and time and role):
-        print("⚠️ Payload content:", payload)
+    # Handle both string and list for roles
+    if isinstance(roles, str):
+        # Try to split by comma if it's a combined input like "Usher, Greeter"
+        roles = [r.strip() for r in roles.split(',') if r.strip()]
+    elif not isinstance(roles, list):
+        roles = []
+
+    if not (name and date and time and roles):
         sys.exit("❌ Missing required volunteer or shift data in payload.")
 
-    shifts = [{
-        'date': date,
-        'time': time,
-        'role': role
-    }]
+    shifts = [{'date': date, 'time': time, 'role': role} for role in roles]
     return name, phone, notify_sms, shifts
 
 def main():
     parser = argparse.ArgumentParser(description="Process volunteer submission")
-    parser.add_argument('--payload-json', type=str, help="Path to JSON payload file")
+    parser.add_argument('--payload-json', type=str, help="JSON payload string from webhook / dispatch")
     parser.add_argument('--name', type=str, help="Volunteer name (fallback)")
     parser.add_argument('--phone', type=str, help="Phone number (fallback)")
     parser.add_argument('--shifts', type=str, nargs='*', help="Shifts (fallback)")
@@ -64,23 +65,37 @@ def main():
 
     if args.payload_json:
         try:
-            with open(args.payload_json, 'r') as f:
-                payload = json.load(f)
-        except Exception as e:
-            sys.exit(f"❌ Failed to load JSON payload: {e}")
+            payload = json.loads(args.payload_json)
+        except json.JSONDecodeError:
+            sys.exit("❌ Invalid JSON payload provided.")
         name, phone, notify_sms, shifts = parse_payload(payload)
 
-    elif args.name and args.shifts:
+    else:
+        if not args.name or not args.shifts:
+            sys.exit("❌ Missing required --name or --shifts")
         name = args.name.strip()
         phone = (args.phone or "").strip()
         notify_sms = args.notify_sms
         shifts = []
         for shift_line in args.shifts:
-            shifts.extend(parse_shifts([shift_line]))
-    else:
-        sys.exit("❌ Must provide either --payload-json or --name and --shifts")
+            # Fallback parsing (e.g., "2025-08-09, 18:00 – Usher")
+            try:
+                date_part, rest = shift_line.split(',', 1)
+                time_part, role_part = rest.split('–', 1)
+                shifts.append({
+                    'date': date_part.strip(),
+                    'time': time_part.strip(),
+                    'role': role_part.strip()
+                })
+            except ValueError:
+                continue
+
+    if not shifts:
+        sys.exit("❌ No valid shifts could be parsed.")
 
     schedule = load_schedule()
+
+    # Remove any existing entries for this volunteer (match by name and phone)
     schedule = [v for v in schedule if not (v.get('name') == name and v.get('phone') == phone)]
 
     new_volunteer = {
@@ -94,7 +109,6 @@ def main():
     schedule.append(new_volunteer)
     save_schedule(schedule)
     export_json(schedule)
-
     print(f"✅ Recorded {name} with {len(shifts)} shift(s).")
 
 if __name__ == "__main__":
