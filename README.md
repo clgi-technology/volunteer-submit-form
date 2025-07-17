@@ -3,6 +3,8 @@
 This project collects volunteer availability using a **free Tally form**, and processes each submission via a local `make` command that sends data directly to GitHub using the `repository_dispatch` API. GitHub Actions then appends the data to a YAML file and (optionally) sends an SMS reminder using ClickSend.
 
 ---
+## 📒 Directory Tree
+
 ```
 volunteer-submit-form/
 ├── .github/
@@ -20,7 +22,7 @@ volunteer-submit-form/
 
 ```
 
-## 📒 Notes
+## 📒 Directory Tree Notes
 
 - `.github/workflows/handle-dispatch.yml` — GitHub Action triggered by `repository_dispatch`
 - `scripts/` — Python utilities that run inside the GitHub Action
