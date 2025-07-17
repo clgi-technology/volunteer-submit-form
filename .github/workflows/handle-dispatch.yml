@@ -1,0 +1,46 @@
+name: Handle Volunteer Dispatch
+
+on:
+  repository_dispatch:
+    types: [volunteer_submission]
+
+jobs:
+  handle-dispatch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install clicksend-client pyyaml
+
+      - name: Process submission and update volunteer_input.yaml
+        run: |
+          python scripts/process_submission.py "${{ github.event.client_payload }}"
+
+      - name: Regenerate calendar page
+        run: |
+          python scripts/generate_calendar.py
+
+      - name: Commit updated volunteer_input.yaml and calendar.html
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add volunteer_input.yaml docs/calendar.html
+          git commit -m "Update volunteer schedule and calendar" || echo "No changes to commit"
+          git push
+
+      - name: Send SMS Notification (if phone provided and notify_sms is true)
+        if: github.event.client_payload.phone != '' && github.event.client_payload.notify_sms == 'true'
+        env:
+          CLICKSEND_USERNAME: ${{ secrets.CLICKSEND_USERNAME }}
+          CLICKSEND_API_KEY: ${{ secrets.CLICKSEND_API_KEY }}
+        run: |
+          python scripts/send_sms.py "${{ github.event.client_payload.phone }}" "${{ github.event.client_payload.volunteer_name }}"
