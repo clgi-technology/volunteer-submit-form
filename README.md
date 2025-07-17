@@ -19,21 +19,21 @@ volunteer-submit-form/
 
 ⸻
 
-✅ Tally Form Template
+## 📋 Tally.so Form Structure
 
-Here’s a structure to build in Tally.so:
+Use the following structure to build your form in [Tally.so](https://tally.so):
 
-Field	Type	Required	Notes
-Volunteer Name	Short Text	✅	
-Event Name	Short Text	✅	
-Position Title	Dropdown	✅	(e.g., Usher, Greeter, Organizer)
-Date	Date	✅	
-Time	Time	✅	
-Year	Dropdown or Short Text	✅	2025, 2026, etc.
-Phone Number	Phone	❌	Used only for SMS reminders
-Email Address	Email	❌	Used only for optional email alerts
-Notify by SMS?	Checkbox	❌	If checked, will send via ClickSend
-
+| **Field**           | **Type**               | **Required** | **Notes**                                              |
+|---------------------|------------------------|--------------|--------------------------------------------------------|
+| Volunteer Name      | Short Text             | ✅           |                                                        |
+| Event Name          | Short Text             | ✅           |                                                        |
+| Position Title      | Dropdown               | ✅           | e.g., Usher, Greeter, Organizer                        |
+| Date                | Date                   | ✅           |                                                        |
+| Time                | Time                   | ✅           |                                                        |
+| Year                | Dropdown or Short Text | ✅           | e.g., 2025, 2026, etc.                                 |
+| Phone Number        | Phone                  | ❌           | Used only for SMS reminders                            |
+| Email Address       | Email                  | ❌           | Used only for optional email alerts                    |
+| Notify by SMS?      | Checkbox               | ❌           | If checked, will trigger SMS via ClickSend integration |
 
 ⸻
 
