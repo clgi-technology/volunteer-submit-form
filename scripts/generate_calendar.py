@@ -18,7 +18,8 @@ def generate_json(schedule):
                 'date': shift['date'],
                 'time': shift['time'],
                 'volunteer': name,
-                'role': shift['position_title'] if 'position_title' in shift else shift.get('role')
+                'role': shift.get('role') or shift.get('position_title'),
+                'event': shift.get('event') or ""  # include event name, fallback empty string
             })
     return entries
 
@@ -62,7 +63,7 @@ def generate_html(entries):
 <table>
   <thead>
     <tr>
-      <th>Date</th>
+      <th>Date (Event)</th>
       <th>Time</th>
       <th>Volunteer</th>
       <th>Role</th>
@@ -82,9 +83,10 @@ function renderCalendar(data) {{
   const tableBody = document.getElementById('calendar-body');
   tableBody.innerHTML = '';
   data.forEach(entry => {{
+    const eventPart = entry.event ? ` (${entry.event})` : '';
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td>${{entry.date}}</td>
+      <td>${{entry.date}}${{eventPart}}</td>
       <td>${{entry.time}}</td>
       <td>${{entry.volunteer}}</td>
       <td>${{entry.role}}</td>
