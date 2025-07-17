@@ -3,7 +3,7 @@ Excellent — here’s your full project foundation for the new repo volunteer-s
 ⸻
 
 📦 Repo Structure
-
+```
 volunteer-submit-form/
 ├── .github/
 │   └── workflows/
@@ -15,7 +15,7 @@ volunteer-submit-form/
 ├── generate_calendar.py  # optional for future
 ├── README.md
 └── requirements.txt
-
+```
 
 ⸻
 
