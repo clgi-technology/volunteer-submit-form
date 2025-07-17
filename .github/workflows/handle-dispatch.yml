@@ -22,6 +22,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml clicksend-client
 
+      - name: Debug: Print received payload
+        run: |
+          echo "=== DEBUG: Received client_payload ==="
+          echo '${{ toJson(github.event.client_payload) }}'
+          echo "====================================="
+
       - name: Process volunteer submission
         run: |
           python scripts/process_submission.py --payload-json '${{ toJson(github.event.client_payload) }}'
