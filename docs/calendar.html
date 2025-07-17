@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Volunteer Schedule Calendar</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 1em; background: #f9f9f9; }
-    h1 { text-align: center; color: #333; }
-    table { border-collapse: collapse; width: 100%; margin-top: 1em; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #28a745; color: white; }
-    tr:nth-child(even) { background-color: #f2f2f2; }
-    .filters { text-align: center; margin-bottom: 1em; }
-    .filters label { margin-right: 0.25em; }
-    .filters input, .filters select { margin-right: 1em; }
-    .back-link { text-align: center; margin-top: 2em; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Volunteer Schedule Calendar</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 1em; background: #f9f9f9; }
+  h1 { text-align: center; color: #333; }
+  table { border-collapse: collapse; width: 100%; margin-top: 1em; }
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+  th { background-color: #28a745; color: white; }
+  tr:nth-child(even) { background-color: #f2f2f2; }
+  select, input[type="date"] { margin: 0 0.5em 1em 0; padding: 0.5em; font-size: 1em; }
+  .filters { text-align: center; margin-bottom: 1em; }
+  .back-link { text-align: center; margin-top: 2em; }
+</style>
 </head>
 <body>
 
@@ -27,98 +27,66 @@
   <label for="role-filter">Filter by Role:</label>
   <select id="role-filter" onchange="filterCalendar()">
     <option value="All">All</option>
+    <option value="Livestream">Livestream</option>
+<option value="Usher">Usher</option>
   </select>
-
-  <label for="event-filter">Filter by Event:</label>
-  <input type="text" id="event-filter" oninput="filterCalendar()" placeholder="e.g. Missions Conference" />
 </div>
 
 <table>
   <thead>
     <tr>
-      <th>Date</th>
+      <th>Date (Event)</th>
       <th>Time</th>
       <th>Volunteer</th>
       <th>Role</th>
-      <th>Event</th>
     </tr>
   </thead>
   <tbody id="calendar-body"></tbody>
 </table>
 
 <div class="back-link">
-  <a href="https://tally.so/r/w8DOgz">← Back to Sign-Up Page</a>
+  <a href="index.html">← Back to Sign-Up Page</a>
 </div>
 
 <script>
-let volunteerData = [];
-
-function populateRoleFilter(data) {
-  const roleFilter = document.getElementById('role-filter');
-  // Extract unique roles
-  const roles = [...new Set(data.map(entry => entry.role).filter(Boolean))];
-  // Clear all except the "All" option
-  while (roleFilter.options.length > 1) {
-    roleFilter.remove(1);
-  }
-  // Add options dynamically
-  roles.forEach(role => {
-    const option = document.createElement('option');
-    option.value = role;
-    option.textContent = role;
-    roleFilter.appendChild(option);
-  });
-}
-
-fetch('volunteer_schedule.json')
-  .then(response => {
-    if (!response.ok) throw new Error('Failed to load JSON');
-    return response.json();
-  })
-  .then(data => {
-    volunteerData = data;
-    populateRoleFilter(volunteerData);
-    renderCalendar(volunteerData);
-  })
-  .catch(error => {
-    document.getElementById('calendar-body').innerHTML = `<tr><td colspan="5" style="color:red;">${error.message}</td></tr>`;
-  });
+let volunteerData = [{"date": "2025-08-01", "time": "10:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"}, {"date": "2025-08-01", "time": "10:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"}, {"date": "2025-08-02", "time": "10:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"}, {"date": "2025-08-02", "time": "10:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"}, {"date": "2025-08-03", "time": "10:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"}, {"date": "2025-08-03", "time": "10:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"}];
 
 function renderCalendar(data) {
-  const tbody = document.getElementById('calendar-body');
-  tbody.innerHTML = '';
+  const tableBody = document.getElementById('calendar-body');
+  tableBody.innerHTML = '';
   data.forEach(entry => {
+    const eventPart = entry.event ? ` (${
+      entry.event
+    })` : '';
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td>${entry.date}</td>
+      <td>${entry.date}${eventPart}</td>
       <td>${entry.time}</td>
       <td>${entry.volunteer}</td>
       <td>${entry.role}</td>
-      <td>${entry.event || ''}</td>
     `;
-    tbody.appendChild(row);
+    tableBody.appendChild(row);
   });
 }
 
 function filterCalendar() {
   const selectedRole = document.getElementById('role-filter').value;
   const selectedDate = document.getElementById('date-filter').value;
-  const eventFilter = document.getElementById('event-filter').value.toLowerCase();
 
   let filtered = volunteerData;
 
   if (selectedRole !== 'All') {
     filtered = filtered.filter(e => e.role === selectedRole);
   }
+
   if (selectedDate) {
     filtered = filtered.filter(e => e.date === selectedDate);
-  }
-  if (eventFilter) {
-    filtered = filtered.filter(e => e.event && e.event.toLowerCase().includes(eventFilter));
   }
 
   renderCalendar(filtered);
 }
+
+window.onload = () => renderCalendar(volunteerData);
 </script>
 
 </body>
