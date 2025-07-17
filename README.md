@@ -122,13 +122,13 @@ See full script in .github/workflows/handle-dispatch.yml
 If SMS is not used, you can omit these.
 
 ## ✅ Next Steps
- Automate payload.json generation (from YAML or CSV)
 
- Add Google Calendar export
+- [ ] Automate `payload.json` generation (from YAML or CSV)
+- [ ] Add Google Calendar export
+- [ ] Build dashboard UI (optional)
+- [ ] Add form validation
 
- Build dashboard UI (optional)
 
- Add form validation
 
 ## 📝 License
 MIT License
