@@ -11,6 +11,8 @@
     th { background-color: #28a745; color: white; }
     tr:nth-child(even) { background-color: #f2f2f2; }
     .filters { text-align: center; margin-bottom: 1em; }
+    .filters label { margin-right: 0.25em; }
+    .filters input, .filters select { margin-right: 1em; }
     .back-link { text-align: center; margin-top: 2em; }
   </style>
 </head>
@@ -30,6 +32,9 @@
     <option value="Reader">Reader</option>
     <option value="Organizer">Organizer</option>
   </select>
+
+  <label for="event-filter">Filter by Event:</label>
+  <input type="text" id="event-filter" oninput="filterCalendar()" placeholder="e.g. Missions Conference" />
 </div>
 
 <table>
@@ -39,6 +44,7 @@
       <th>Time</th>
       <th>Volunteer</th>
       <th>Role</th>
+      <th>Event</th>
     </tr>
   </thead>
   <tbody id="calendar-body"></tbody>
@@ -61,7 +67,7 @@ fetch('volunteer_schedule.json')
     renderCalendar(volunteerData);
   })
   .catch(error => {
-    document.getElementById('calendar-body').innerHTML = `<tr><td colspan="4" style="color:red;">${error.message}</td></tr>`;
+    document.getElementById('calendar-body').innerHTML = `<tr><td colspan="5" style="color:red;">${error.message}</td></tr>`;
   });
 
 function renderCalendar(data) {
@@ -74,6 +80,7 @@ function renderCalendar(data) {
       <td>${entry.time}</td>
       <td>${entry.volunteer}</td>
       <td>${entry.role}</td>
+      <td>${entry.event || ''}</td>
     `;
     tbody.appendChild(row);
   });
@@ -82,6 +89,8 @@ function renderCalendar(data) {
 function filterCalendar() {
   const selectedRole = document.getElementById('role-filter').value;
   const selectedDate = document.getElementById('date-filter').value;
+  const eventFilter = document.getElementById('event-filter').value.toLowerCase();
+
   let filtered = volunteerData;
 
   if (selectedRole !== 'All') {
@@ -89,6 +98,9 @@ function filterCalendar() {
   }
   if (selectedDate) {
     filtered = filtered.filter(e => e.date === selectedDate);
+  }
+  if (eventFilter) {
+    filtered = filtered.filter(e => e.event && e.event.toLowerCase().includes(eventFilter));
   }
 
   renderCalendar(filtered);
