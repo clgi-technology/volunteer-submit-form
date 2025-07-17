@@ -1,5 +1,22 @@
 NOTE: currently not working due to make misconfiguration. make receives form from tally but unable to correctly map inputs so it sends to GitHub a blank payload. It does work if remove tally and make and replace with using git for bash and send json formatted volunteer data directly to GitHub. 
 
+Sample curl command that works:
+ curl -X POST https://api.github.com/repos/clgi-technology/volunteer-submit-form/dispatches   -H "Accept: application/vnd.github+json"   -H "Authorization: Bearer github_pat_11BTKHPTY0Ib7wQhfbbbofbonogbfgnxRKmVCjAmQbngffZ5ZQ4cDqOn5"   -H "X-GitHub-Api-Version: 2022-11-28"   -d '{
+    "event_type": "volunteer_submission",
+    "client_payload": {
+      "volunteer_name": "Jane Doe",
+      "event_name": "Youth Conference",
+      "position_title": "Livestream,Usher",
+      "start_date": "2025-08-11",
+      "end_date": "2025-08-13",
+      "time": "19:00",
+      "phone": "+15127866597",
+      "email": "jane@example.com",
+      "notify_sms": "true"
+    }
+  }'
+
+
 # 🙌 Volunteer Submit Form - https://tally.so/r/w8DOgz
 
 This project collects volunteer availability using a **free Tally form**, and processes each submission via a local `make` command that sends data directly to GitHub using the `repository_dispatch` API. GitHub Actions then appends the data to a YAML file, submits data to a calendar via github pages and (optionally) sends an SMS reminder using ClickSend.
