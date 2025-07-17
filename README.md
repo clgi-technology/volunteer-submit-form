@@ -1,3 +1,5 @@
+NOTE: currently not working due to make misconfiguration. make receives form from tally but unable to correctly map inputs so it sends to GitHub a blank payload. It does work if remove tally and make and replace with using git for bash and send json formatted volunteer data directly to GitHub. 
+
 # 🙌 Volunteer Submit Form - https://tally.so/r/w8DOgz
 
 This project collects volunteer availability using a **free Tally form**, and processes each submission via a local `make` command that sends data directly to GitHub using the `repository_dispatch` API. GitHub Actions then appends the data to a YAML file, submits data to a calendar via github pages and (optionally) sends an SMS reminder using ClickSend.
