@@ -37,20 +37,31 @@ Use the following structure to build your form in [Tally.so](https://tally.so):
 
 ⸻
 
-🔁 Tally Webhook Settings
+## 🔁 Tally Webhook Settings
 
-Webhook URL (GitHub Dispatch):
+### 📡 Webhook URL (GitHub Repository Dispatch)
 
-https://api.github.com/repos/<your-username>/volunteer-submit-form/dispatches
+```
+https://api.github.com/repos/<username>/volunteer-submit-form/dispatches
 
-Headers:
+```
 
-Authorization: Bearer <your-GitHub-PAT>
+> Replace `<username>` with your GitHub username or organization name.
+
+---
+
+### 🧾 Headers
+
+```http
+Authorization: Bearer <YOUR_GITHUB_TOKEN>
 Content-Type: application/json
 Accept: application/vnd.github.everest-preview+json
+```
 
-Payload Template:
+Make sure your GitHub token has repo and workflow scopes.
 
+📦 Payload Template
+```
 {
   "event_type": "volunteer_submission",
   "client_payload": {
@@ -65,8 +76,8 @@ Payload Template:
     "notify_sms": "@Notify by SMS?"
   }
 }
-
-
+```
+Tally will substitute the @Field Name values with real form responses.
 ⸻
 
 🔧 GitHub Action: .github/workflows/handle-dispatch.yml
