@@ -1,27 +1,21 @@
-Excellent — here’s your full project foundation for the new repo volunteer-submit-form, including:
+# 🙌 Volunteer Submit Form
 
-⸻
+This project collects volunteer availability using a **free Tally form**, and processes each submission via a local `make` command that sends data directly to GitHub using the `repository_dispatch` API. GitHub Actions then appends the data to a YAML file and (optionally) sends an SMS reminder using ClickSend.
 
-📦 Repo Structure
-```
-volunteer-submit-form/
-├── .github/
-│   └── workflows/
-│       └── handle-dispatch.yml
-├── scripts/
-│   ├── process_submission.py
-│   └── send_clicksend_sms.py
-├── volunteer_input.yaml
-├── generate_calendar.py  # optional for future
-├── README.md
-└── requirements.txt
-```
+---
 
-⸻
+## 🚀 How It Works
 
-## 📋 Tally.so Form Structure
+1. A volunteer fills out the Tally form
+2. A coordinator runs `make submit` with form data
+3. This triggers a GitHub Action via `repository_dispatch`
+4. The Action:
+   - Appends data to `volunteer_input.yaml`
+   - Optionally sends an SMS if enabled
 
-Use the following structure to build your form in [Tally.so](https://tally.so):
+---
+
+## 📋 Form Fields (via Tally)
 
 | **Field**           | **Type**               | **Required** | **Notes**                                              |
 |---------------------|------------------------|--------------|--------------------------------------------------------|
@@ -33,504 +27,108 @@ Use the following structure to build your form in [Tally.so](https://tally.so):
 | Year                | Dropdown or Short Text | ✅           | e.g., 2025, 2026, etc.                                 |
 | Phone Number        | Phone                  | ❌           | Used only for SMS reminders                            |
 | Email Address       | Email                  | ❌           | Used only for optional email alerts                    |
-| Notify by SMS?      | Checkbox               | ❌           | If checked, will trigger SMS via ClickSend integration |
-
-⸻
-
-## 🔁 Tally Webhook Settings
-
-### 📡 Webhook URL (GitHub Repository Dispatch)
-
-```
-https://api.github.com/repos/<username>/volunteer-submit-form/dispatches
-
-```
-
-> Replace `<username>` with your GitHub username or organization name.
+| Notify by SMS?      | Checkbox               | ❌           | If checked, will trigger SMS via ClickSend             |
 
 ---
 
-### 🧾 Headers
+## 🔧 Setup Instructions
 
-```http
-Authorization: Bearer <YOUR_GITHUB_TOKEN>
-Content-Type: application/json
-Accept: application/vnd.github.everest-preview+json
+### 1. Clone This Repo
+
+```bash
+git clone https://github.com/<your-username>/volunteer-submit-form
+cd volunteer-submit-form
 ```
 
-Make sure your GitHub token has repo and workflow scopes.
+### 2. Add Your GitHub Token
+Create a GitHub Personal Access Token with repo and workflow scopes.
 
-📦 Payload Template
+Set it in your environment:
 ```
+export GITHUB_TOKEN=ghp_abc123yourtoken
+```
+
+### 3. Prepare payload.json
+Manually create or generate payload.json with form data:
+
+```json
+
 {
   "event_type": "volunteer_submission",
   "client_payload": {
-    "volunteer_name": "@Volunteer Name",
-    "event_name": "@Event Name",
-    "position_title": "@Position Title",
-    "date": "@Date",
-    "year": "@Year",
-    "time": "@Time",
-    "phone": "@Phone Number",
-    "email": "@Email Address",
-    "notify_sms": "@Notify by SMS?"
+    "volunteer_name": "Alice Smith",
+    "event_name": "Community Cleanup",
+    "position_title": "Greeter",
+    "date": "2025-08-01",
+    "year": "2025",
+    "time": "10:00 AM",
+    "phone": "+15551234567",
+    "email": "alice@example.com",
+    "notify_sms": "true"
   }
 }
 ```
-Tally will substitute the @Field Name values with real form responses.
-⸻
+You can write your own script to export this from a spreadsheet or YAML.
 
-🔧 GitHub Action: .github/workflows/handle-dispatch.yml
+### 4. Use make to Submit
+```
+make submit
+```
+This will trigger the GitHub Action via curl using your token and the payload.json.
+
+
+## 🧪 Makefile
+```
+submit:
+	curl -X POST https://api.github.com/repos/<your-username>/volunteer-submit-form/dispatches \
+	-H "Authorization: Bearer $(GITHUB_TOKEN)" \
+	-H "Accept: application/vnd.github.everest-preview+json" \
+	-H "Content-Type: application/json" \
+	-d @payload.json
 
 ```
-name: Handle Volunteer Submission
+Replace <your-username> with your actual GitHub username or org.
 
-on:
-  repository_dispatch:
-    types: [volunteer_submission]
+## 🔄 GitHub Action
+The .github/workflows/handle-dispatch.yml workflow:
 
-jobs:
-  append-entry:
-    runs-on: ubuntu-latest
+Listens for repository_dispatch events
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+Appends data to volunteer_input.yaml
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+Sends SMS if enabled
 
-      - name: Install dependencies
-        run: pip install pyyaml requests
+See full script in .github/workflows/handle-dispatch.yml
 
-      - name: Save and process submission
-        run: |
-          echo '${{ toJSON(github.event.client_payload) }}' > payload.json
-          python scripts/process_submission.py payload.json
-
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add volunteer_input.yaml
-          git commit -m "Add new volunteer entry"
-          git push
-
-      - name: Send SMS via ClickSend
-        if: ${{ github.event.client_payload.notify_sms == 'true' }}
-        run: python scripts/send_clicksend_sms.py payload.json
-        env:
-          CLICKSEND_USERNAME: ${{ secrets.CLICKSEND_USERNAME }}
-          CLICKSEND_API_KEY: ${{ secrets.CLICKSEND_API_KEY }}
-
+## 📄 volunteer_input.yaml Format
 ```
-⸻
-
-🐍 scripts/process_submission.py
-
-```
-import sys
-import json
-import yaml
-
-with open(sys.argv[1], 'r') as f:
-    payload = json.load(f)
-
-entry = {
-    "volunteer_name": payload["volunteer_name"],
-    "event_name": payload["event_name"],
-    "position_title": payload["position_title"],
-    "date": payload["date"],
-    "year": payload["year"],
-    "time": payload["time"],
-    "phone": payload.get("phone"),
-    "email": payload.get("email")
-}
-
-file_path = "volunteer_input.yaml"
-
-try:
-    with open(file_path, 'r') as f:
-        data = yaml.safe_load(f) or []
-except FileNotFoundError:
-    data = []
-
-data.append(entry)
-
-with open(file_path, 'w') as f:
-    yaml.dump(data, f)
-
-```
-⸻
-
-📲 scripts/send_clicksend_sms.py
-
-```
-import sys
-import json
-import os
-import requests
-
-with open(sys.argv[1], 'r') as f:
-    payload = json.load(f)
-
-phone = payload.get("phone")
-if not phone:
-    print("No phone number provided.")
-    exit(0)
-
-message = f"""Hi {payload['volunteer_name']}, you're confirmed for:
-Event: {payload['event_name']}
-Position: {payload['position_title']}
-Date: {payload['date']} {payload['year']} at {payload['time']}
-"""
-
-response = requests.post(
-    "https://rest.clicksend.com/v3/sms/send",
-    auth=(os.environ["CLICKSEND_USERNAME"], os.environ["CLICKSEND_API_KEY"]),
-    headers={"Content-Type": "application/json"},
-    json={
-        "messages": [{
-            "to": phone,
-            "body": message
-        }]
-    }
-)
-
-print("ClickSend response:", response.text)
-
-```
-⸻
-
-📄 requirements.txt
-
-```
-pyyaml
-requests
-```
-
-⸻
-
-📘 README.md
-
-# 🙌 Volunteer Submit Form
-
-This project collects volunteer shift availability using a no-login **Tally form**, and processes submissions automatically via **GitHub Actions**. Optional SMS reminders are sent using ClickSend.
-
----
-
-## 🚀 How It Works
-
-1. Volunteer fills out a form (Tally)
-2. Tally sends data via webhook to GitHub
-3. GitHub Action:
-   - Appends to `volunteer_input.yaml`
-   - Sends optional SMS reminder
-   - (Optional) Generates calendar or dashboard
-
----
-
-## 📋 Fields Collected
-
-- Volunteer Name
-- Event Name
-- Position Title
-- Date
-- Year
-- Time
-- Phone (optional, for SMS)
-- Email (optional)
-- Checkbox: Send SMS Reminder?
-
----
-
-## 🔧 Setup
-
-### 1. Create GitHub PAT
-With `repo` + `workflow` scope.
-
-### 2. Add GitHub Secrets
-| Name | Description |
-|------|-------------|
-| `CLICKSEND_USERNAME` | ClickSend account username |
-| `CLICKSEND_API_KEY`  | ClickSend API key |
-
-### 3. Configure Tally Webhook
-Use your repo’s dispatch URL with Authorization and JSON payload.
-
----
-
-## 📄 Data Format (`volunteer_input.yaml`)
-
-```
-yaml
-- volunteer_name: Alice
+- volunteer_name: Alice Smith
   event_name: Community Cleanup
-  position_title: Organizer
+  position_title: Greeter
   date: 2025-08-01
   year: 2025
   time: 10:00 AM
   phone: +15551234567
   email: alice@example.com
-```
-
-⸻
-
-✅ Future Enhancements
-	•	Email confirmations
-	•	Admin dashboard
-	•	iCal or Google Calendar exports
-
-⸻
-
-📄 License
-
-MIT License
-
----
-
-Here’s a fully scaffolded setup that you can create in your new volunteer-submit-form GitHub repo. You can copy-paste the content into your files:
-
-⸻
-
-📁 Repository Structure
 
 ```
-volunteer-submit-form/
-├── .github/
-│   └── workflows/
-│       └── handle-dispatch.yml
-├── scripts/
-│   ├── process_submission.py
-│   └── send_clicksend_sms.py
-├── volunteer_input.yaml
-├── requirements.txt
-└── README.md
-```
+## 🔐 GitHub Secrets (for SMS)
+Name	Description
+CLICKSEND_USERNAME	Your ClickSend username
+CLICKSEND_API_KEY	ClickSend API key
 
-⸻
-
-```
-🔧 1. .github/workflows/handle-dispatch.yml
-
-name: Handle Volunteer Submission
-
-on:
-  repository_dispatch:
-    types: [volunteer_submission]
-
-jobs:
-  append-entry:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - run: pip install pyyaml requests
-        name: Install dependencies
-
-      - name: Save and process submission
-        run: |
-          echo '${{ toJSON(github.event.client_payload) }}' > payload.json
-          python scripts/process_submission.py payload.json
-
-      - name: Commit changes
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add volunteer_input.yaml
-          git commit -m "Add new volunteer entry" || echo "No changes to commit"
-          git push
-
-      - name: Send SMS via ClickSend
-        if: ${{ github.event.client_payload.notify_sms == 'true' }}
-        run: python scripts/send_clicksend_sms.py payload.json
-        env:
-          CLICKSEND_USERNAME: ${{ secrets.CLICKSEND_USERNAME }}
-          CLICKSEND_API_KEY: ${{ secrets.CLICKSEND_API_KEY }}
-
-```
-⸻
-
-🔧 2. scripts/process_submission.py
-
-```
-import sys, json, yaml
-
-with open(sys.argv[1], 'r') as f:
-    payload = json.load(f)
-
-entry = {
-    "volunteer_name": payload.get("volunteer_name"),
-    "event_name": payload.get("event_name"),
-    "position_title": payload.get("position_title"),
-    "date": payload.get("date"),
-    "year": payload.get("year"),
-    "time": payload.get("time"),
-    "phone": payload.get("phone"),
-    "email": payload.get("email")
-}
-
-file_path = "volunteer_input.yaml"
-try:
-    existing = yaml.safe_load(open(file_path)) or []
-except FileNotFoundError:
-    existing = []
-
-existing.append(entry)
-
-with open(file_path, 'w') as f:
-    yaml.dump(existing, f)
-
-```
-⸻
-
-🔧 3. scripts/send_clicksend_sms.py
-
-```
-import sys, json, os, requests
-
-with open(sys.argv[1], 'r') as f:
-    payload = json.load(f)
-
-phone = payload.get("phone")
-if not phone:
-    print("❗ No phone number provided. Skipping SMS.")
-    sys.exit(0)
-
-message = (
-    f"Hi {payload['volunteer_name']}, you’re confirmed:\n"
-    f"{payload['event_name']} – {payload['position_title']} on {payload['date']} "
-    f"{payload['year']} at {payload['time']}."
-)
-
-response = requests.post(
-    "https://rest.clicksend.com/v3/sms/send",
-    auth=(os.environ["CLICKSEND_USERNAME"], os.environ["CLICKSEND_API_KEY"]),
-    headers={"Content-Type": "application/json"},
-    json={"messages": [{"to": phone, "body": message}]}
-)
-
-print("ClickSend response:", response.text)
-
-```
-⸻
-
-🧹 4. volunteer_input.yaml
-```
-
-Start with an empty YAML array:
-
-[]
-
-```
-⸻
-
-📦 5. requirements.txt
-
-```
-pyyaml
-requests
-
-```
-⸻
-
-📘 6. README.md
-
-# 🙌 Volunteer Submit Form
-
-Collect volunteer submissions via a no‑login **Tally form**, processed server‑side by **GitHub Actions**. Optional SMS reminders are sent via **ClickSend**.
-
----
-
-## 🚀 How It Works
-
-1. Volunteer submits your Tally form.
-2. Tally sends a webhook payload to the GitHub API.
-3. GitHub Action appends data to `volunteer_input.yaml` and optionally sends an SMS.
-4. (Optional) Later, use this data to build a calendar or admin UI.
-
----
-
-## 📋 Fields Collected
-
-- Volunteer Name
-- Event Name
-- Position Title
-- Date, Year, Time
-- [Optional] Phone (for SMS reminders)
-- [Optional] Email
-- Checkbox: Send SMS Reminder?
-
----
-
-## 🔧 Setup
-
-1. **Create a GitHub PAT** with `repo` + `workflow` scopes.
-2. In GitHub repo settings → **Secrets**, add:
-   - `CLICKSEND_USERNAME`
-   - `CLICKSEND_API_KEY`
-3. **Create your Tally form** and configure the webhook:
-   - POST to:
-     ```
-     https://api.github.com/repos/<you>/volunteer-submit-form/dispatches
-     ```
-   - Headers:
-     ```
-     Authorization: Bearer <your‑PAT>
-     Content-Type: application/json
-     Accept: application/vnd.github.everest-preview+json
-     ```
-   - Payload:
-     ```json
-     {
-       "event_type": "volunteer_submission",
-       "client_payload": {
-         "volunteer_name": "@Volunteer Name",
-         "event_name": "@Event Name",
-         "position_title": "@Position Title",
-         "date": "@Date",
-         "year": "@Year",
-         "time": "@Time",
-         "phone": "@Phone Number",
-         "email": "@Email Address",
-         "notify_sms": "@Notify by SMS?"
-       }
-     }
-     ```
-4. Submit a test via Tally — check GitHub Actions run, and see a new entry appear in `volunteer_input.yaml`.
-
----
+If SMS is not used, you can omit these.
 
 ## ✅ Next Steps
+ Automate payload.json generation (from YAML or CSV)
 
-- Build calendar/dashboard (e.g., with `generate_calendar.py`)
-- Add email confirmations
-- Create administrative dashboard
-- Export iCal or integrate with Google Calendar
+ Add Google Calendar export
 
----
+ Build dashboard UI (optional)
+
+ Add form validation
 
 ## 📝 License
+MIT License
 
-This project is released under the MIT License.
 
-
-⸻
-
-✅ Next Actions for You
-	•	Copy this scaffolding into your GitHub repo
-	•	Create your Tally form with the specified fields
-	•	Configure the webhook URL and headers
-	•	Add GitHub secrets (CLICKSEND_USERNAME, CLICKSEND_API_KEY)
-	•	Submit a test and verify the Action runs and appends data
-
-⸻
-
-Would you like help generating the Tally form link or assistance adding calendar generation in the next step?
