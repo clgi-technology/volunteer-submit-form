@@ -44,7 +44,6 @@ def parse_payload(payload):
 
     shifts = []
 
-    # Preferred: structured list of shifts
     if 'shifts' in payload and isinstance(payload['shifts'], list):
         for s in payload['shifts']:
             date = s.get('date')
@@ -53,20 +52,28 @@ def parse_payload(payload):
             event = s.get('event') or s.get('event_name') or ""
             if date and time and role:
                 shifts.append({'date': date, 'time': time, 'role': role, 'event': event})
-
     else:
-        # Handle start_date and end_date range
         start_date_str = payload.get('start_date')
         end_date_str = payload.get('end_date')
-
         time = payload.get('time')
         roles = payload.get('position_title')
         event = payload.get('event_name') or ""
 
+        # Normalize roles
         if isinstance(roles, str):
             roles = [r.strip() for r in roles.split(',') if r.strip()]
         elif not isinstance(roles, list):
             roles = []
+
+        # Validation output
+        if not start_date_str:
+            print("❌ Missing 'start_date'")
+        if not end_date_str:
+            print("❌ Missing 'end_date'")
+        if not time:
+            print("❌ Missing 'time'")
+        if not roles:
+            print("❌ Missing 'position_title' (no roles parsed)")
 
         if start_date_str and end_date_str and time and roles:
             try:
@@ -79,12 +86,16 @@ def parse_payload(payload):
                 date_str = single_date.isoformat()
                 for role in roles:
                     shifts.append({'date': date_str, 'time': time, 'role': role, 'event': event})
-
         else:
-            sys.exit("❌ Missing required date range, time, or roles.")
+            sys.exit("❌ Missing required date range, time, or roles. See above.")
+
+    if not name:
+        print("❌ Missing 'volunteer_name'")
+    if not shifts:
+        print("❌ No valid shift data created.")
 
     if not (name and shifts):
-        sys.exit("❌ Missing required volunteer name or shift data.")
+        sys.exit("❌ Submission invalid — volunteer name or shifts missing.")
 
     return name, phone, notify_sms, shifts
 
@@ -103,7 +114,6 @@ def main():
         except json.JSONDecodeError:
             sys.exit("❌ Invalid JSON payload provided.")
         name, phone, notify_sms, shifts = parse_payload(payload)
-
     else:
         if not args.name or not args.shifts:
             sys.exit("❌ Missing required --name or --shifts")
@@ -121,7 +131,7 @@ def main():
                         'date': date_part.strip(),
                         'time': time_part.strip(),
                         'role': role,
-                        'event': ""  # No event data from CLI fallback
+                        'event': ""
                     })
             except ValueError:
                 continue
@@ -131,7 +141,7 @@ def main():
 
     schedule = load_schedule()
 
-    # Remove any existing entries for this volunteer (match by name and phone)
+    # Remove existing entries with same name and phone
     schedule = [v for v in schedule if not (v.get('name') == name and v.get('phone') == phone)]
 
     new_volunteer = {
