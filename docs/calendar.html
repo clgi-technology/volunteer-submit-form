@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Volunteer Schedule Calendar</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 1em; background: #f9f9f9; }
+    h1 { text-align: center; color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1em; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #28a745; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    .filters { text-align: center; margin-bottom: 1em; }
+    .back-link { text-align: center; margin-top: 2em; }
+  </style>
+</head>
+<body>
+
+<h1>Volunteer Schedule Calendar</h1>
+
+<div class="filters">
+  <label for="date-filter">Filter by Date:</label>
+  <input type="date" id="date-filter" onchange="filterCalendar()" />
+
+  <label for="role-filter">Filter by Role:</label>
+  <select id="role-filter" onchange="filterCalendar()">
+    <option value="All">All</option>
+    <option value="Usher">Usher</option>
+    <option value="Greeter">Greeter</option>
+    <option value="Reader">Reader</option>
+    <option value="Organizer">Organizer</option>
+  </select>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Time</th>
+      <th>Volunteer</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody id="calendar-body"></tbody>
+</table>
+
+<div class="back-link">
+  <a href="index.html">← Back to Sign-Up Page</a>
+</div>
+
+<script>
+let volunteerData = [];
+
+fetch('volunteer_schedule.json')
+  .then(response => {
+    if (!response.ok) throw new Error('Failed to load JSON');
+    return response.json();
+  })
+  .then(data => {
+    volunteerData = data;
+    renderCalendar(volunteerData);
+  })
+  .catch(error => {
+    document.getElementById('calendar-body').innerHTML = `<tr><td colspan="4" style="color:red;">${error.message}</td></tr>`;
+  });
+
+function renderCalendar(data) {
+  const tbody = document.getElementById('calendar-body');
+  tbody.innerHTML = '';
+  data.forEach(entry => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${entry.date}</td>
+      <td>${entry.time}</td>
+      <td>${entry.volunteer_name}</td>
+      <td>${entry.position_title}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function filterCalendar() {
+  const selectedRole = document.getElementById('role-filter').value;
+  const selectedDate = document.getElementById('date-filter').value;
+  let filtered = volunteerData;
+
+  if (selectedRole !== 'All') {
+    filtered = filtered.filter(e => e.position_title === selectedRole);
+  }
+  if (selectedDate) {
+    filtered = filtered.filter(e => e.date === selectedDate);
+  }
+
+  renderCalendar(filtered);
+}
+</script>
+
+</body>
+</html>
