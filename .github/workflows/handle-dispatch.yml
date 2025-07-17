@@ -22,14 +22,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyyaml clicksend-client
 
-      - name: Convert payload to compact JSON
-        id: json
+      - name: Process volunteer submission
         run: |
-          echo '${{ toJson(github.event.client_payload) }}' | jq -c '.' > payload.json
-
-      - name: Process submission and update volunteer_input.yaml
-        run: |
-          python scripts/process_submission.py --payload-json "$(cat payload.json)"
+          python scripts/process_submission.py --payload-json '${{ toJson(github.event.client_payload) }}'
 
       - name: Regenerate calendar page
         run: |
