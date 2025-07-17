@@ -113,9 +113,11 @@ See full script in .github/workflows/handle-dispatch.yml
 
 ```
 ## 🔐 GitHub Secrets (for SMS)
-Name	Description
-CLICKSEND_USERNAME	Your ClickSend username
-CLICKSEND_API_KEY	ClickSend API key
+| Name               | Description            |
+|--------------------|------------------------|
+| `CLICKSEND_USERNAME` | Your ClickSend username |
+| `CLICKSEND_API_KEY`  | ClickSend API key       |
+
 
 If SMS is not used, you can omit these.
 
