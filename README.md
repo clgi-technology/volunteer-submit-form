@@ -249,7 +249,8 @@ Use your repo’s dispatch URL with Authorization and JSON payload.
 
 ## 📄 Data Format (`volunteer_input.yaml`)
 
-```yaml
+```
+yaml
 - volunteer_name: Alice
   event_name: Community Cleanup
   position_title: Organizer
@@ -258,7 +259,7 @@ Use your repo’s dispatch URL with Authorization and JSON payload.
   time: 10:00 AM
   phone: +15551234567
   email: alice@example.com
-
+```
 
 ⸻
 
@@ -281,6 +282,7 @@ Here’s a fully scaffolded setup that you can create in your new volunteer-subm
 
 📁 Repository Structure
 
+```
 volunteer-submit-form/
 ├── .github/
 │   └── workflows/
@@ -291,10 +293,11 @@ volunteer-submit-form/
 ├── volunteer_input.yaml
 ├── requirements.txt
 └── README.md
-
+```
 
 ⸻
 
+```
 🔧 1. .github/workflows/handle-dispatch.yml
 
 name: Handle Volunteer Submission
@@ -337,11 +340,12 @@ jobs:
           CLICKSEND_USERNAME: ${{ secrets.CLICKSEND_USERNAME }}
           CLICKSEND_API_KEY: ${{ secrets.CLICKSEND_API_KEY }}
 
-
+```
 ⸻
 
 🔧 2. scripts/process_submission.py
 
+```
 import sys, json, yaml
 
 with open(sys.argv[1], 'r') as f:
@@ -369,11 +373,12 @@ existing.append(entry)
 with open(file_path, 'w') as f:
     yaml.dump(existing, f)
 
-
+```
 ⸻
 
 🔧 3. scripts/send_clicksend_sms.py
 
+```
 import sys, json, os, requests
 
 with open(sys.argv[1], 'r') as f:
@@ -399,24 +404,26 @@ response = requests.post(
 
 print("ClickSend response:", response.text)
 
-
+```
 ⸻
 
 🧹 4. volunteer_input.yaml
+```
 
 Start with an empty YAML array:
 
 []
 
-
+```
 ⸻
 
 📦 5. requirements.txt
 
+```
 pyyaml
 requests
 
-
+```
 ⸻
 
 📘 6. README.md
