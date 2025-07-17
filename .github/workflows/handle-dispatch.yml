@@ -23,22 +23,23 @@ jobs:
 
       - name: Process submission and update volunteer_input.yaml
         run: |
-          python scripts/process_submission.py "${{ github.event.client_payload }}"
+          echo '${{ toJson(github.event.client_payload) }}' > payload.json
+          python scripts/process_submission.py --payload-json payload.json
 
       - name: Regenerate calendar page
         run: |
           python scripts/generate_calendar.py
 
-      - name: Commit updated volunteer_input.yaml and calendar.html
+      - name: Commit updated files
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add volunteer_input.yaml docs/calendar.html
-          git commit -m "Update volunteer schedule and calendar" || echo "No changes to commit"
+          git add volunteer_input.yaml docs/calendar.html docs/volunteer_schedule.json
+          git commit -m "Update volunteer data and calendar" || echo "No changes to commit"
           git push
 
       - name: Send SMS Notification (if phone provided and notify_sms is true)
-        if: github.event.client_payload.phone != '' && github.event.client_payload.notify_sms == 'true'
+        if: ${{ github.event.client_payload.phone != '' && github.event.client_payload.notify_sms == 'true' }}
         env:
           CLICKSEND_USERNAME: ${{ secrets.CLICKSEND_USERNAME }}
           CLICKSEND_API_KEY: ${{ secrets.CLICKSEND_API_KEY }}
