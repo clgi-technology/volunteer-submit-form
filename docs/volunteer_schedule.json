@@ -25,15 +25,9 @@
   },
   {
     "date": "2025-07-12",
-    "time": 1380,
+    "time": "23:00",
     "volunteer": "John Doe",
     "role": "Greeter"
-  },
-  {
-    "date": "2025-07-22",
-    "time": "18:00",
-    "volunteer": "Jane Doe",
-    "role": "Usher"
   },
   {
     "date": "2025-07-22",
