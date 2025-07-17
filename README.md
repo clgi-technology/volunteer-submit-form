@@ -9,16 +9,18 @@ This project collects volunteer availability using a **free Tally form**, and pr
 volunteer-submit-form/
 ├── .github/
 │   └── workflows/
-│       └── handle-dispatch.yml       # GitHub Action that processes the form submission
+│       └── handle-dispatch.yml
 ├── scripts/
-│   ├── process_submission.py         # Appends data to YAML
-│   └── send_clicksend_sms.py        # Sends SMS via ClickSend (optional)
-├── examples/
-│   └── sample_payload.json           # Example payload for testing
-├── volunteer_input.yaml              # Where submissions are stored
-├── Makefile                          # Runs curl to trigger GitHub Action
-├── README.md                         # Project overview and setup instructions
-├── requirements.txt                  # Python dependencies
+│   ├── process_submission.py
+│   ├── send_clicksend_sms.py
+│   └── generate_calendar.py    ◀️ NEW
+├── calendar_output/
+│   └── calendar.html           ◀️ Output for SharePoint
+├── volunteer_input.yaml
+├── Makefile
+├── payload.json
+├── requirements.txt
+└── README.md
 
 ```
 
