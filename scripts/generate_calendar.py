@@ -12,19 +12,19 @@ def load_schedule():
 def generate_json(schedule):
     entries = []
     for volunteer in schedule:
-        name = volunteer.get('volunteer_name') or volunteer.get('name')  # fallback for different keys
+        name = volunteer.get('volunteer_name') or volunteer.get('name', '')
         for shift in volunteer.get('shifts', []):
             entries.append({
                 'date': shift['date'],
                 'time': shift['time'],
                 'volunteer': name,
-                'role': shift.get('role') or shift.get('position_title'),
-                'event': shift.get('event') or ""  # include event name, fallback empty string
+                'role': shift.get('role') or shift.get('position_title', ''),
+                'event': shift.get('event') or ""
             })
     return entries
 
 def generate_html(entries):
-    roles = sorted(set(e['role'] for e in entries))
+    roles = sorted(set(e['role'] for e in entries if e['role']))
     roles_options = '\n'.join(f'<option value="{r}">{r}</option>' for r in roles)
 
     html = f"""<!DOCTYPE html>
@@ -83,7 +83,9 @@ function renderCalendar(data) {{
   const tableBody = document.getElementById('calendar-body');
   tableBody.innerHTML = '';
   data.forEach(entry => {{
-    const eventPart = entry.event ? ` (${entry.event})` : '';
+    const eventPart = entry.event ? ` (${{
+      entry.event
+    }})` : '';
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${{entry.date}}${{eventPart}}</td>
