@@ -28,13 +28,7 @@
   <select id="role-filter" onchange="filterCalendar()">
     <option value="All">All</option>
     <option value="Livestream">Livestream</option>
-    <option value="Usher">Usher</option>
-  </select>
-
-  <label for="event-filter">Filter by Event:</label>
-  <select id="event-filter" onchange="filterCalendar()">
-    <option value="All">All</option>
-    <!-- Event options populated by JS -->
+<option value="Usher">Usher</option>
   </select>
 </div>
 
@@ -55,32 +49,15 @@
 </div>
 
 <script>
-let volunteerData = [
-  {"date": "2025-08-01", "time": "10:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"},
-  {"date": "2025-08-01", "time": "10:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"},
-  {"date": "2025-08-02", "time": "10:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"},
-  {"date": "2025-08-02", "time": "10:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"},
-  {"date": "2025-08-03", "time": "10:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"},
-  {"date": "2025-08-03", "time": "10:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"}
-];
-
-// Dynamically populate event filter options based on unique events in the data
-function populateEventFilter() {
-  const eventFilter = document.getElementById('event-filter');
-  const events = Array.from(new Set(volunteerData.map(e => e.event))).sort();
-  events.forEach(eventName => {
-    const option = document.createElement('option');
-    option.value = eventName;
-    option.textContent = eventName;
-    eventFilter.appendChild(option);
-  });
-}
+let volunteerData = [{"date": "2025-08-01", "time": "10:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"}, {"date": "2025-08-01", "time": "10:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"}, {"date": "2025-08-02", "time": "10:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"}, {"date": "2025-08-02", "time": "10:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"}, {"date": "2025-08-03", "time": "10:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"}, {"date": "2025-08-03", "time": "10:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"}, {"date": "2025-08-11", "time": "19:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"}, {"date": "2025-08-11", "time": "19:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"}, {"date": "2025-08-12", "time": "19:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"}, {"date": "2025-08-12", "time": "19:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"}, {"date": "2025-08-13", "time": "19:00", "volunteer": "Jane Doe", "role": "Livestream", "event": "Youth Conference"}, {"date": "2025-08-13", "time": "19:00", "volunteer": "Jane Doe", "role": "Usher", "event": "Youth Conference"}];
 
 function renderCalendar(data) {
   const tableBody = document.getElementById('calendar-body');
   tableBody.innerHTML = '';
   data.forEach(entry => {
-    const eventPart = entry.event ? ` (${entry.event})` : '';
+    const eventPart = entry.event ? ` (${
+      entry.event
+    })` : '';
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${entry.date}${eventPart}</td>
@@ -95,7 +72,6 @@ function renderCalendar(data) {
 function filterCalendar() {
   const selectedRole = document.getElementById('role-filter').value;
   const selectedDate = document.getElementById('date-filter').value;
-  const selectedEvent = document.getElementById('event-filter').value;
 
   let filtered = volunteerData;
 
@@ -107,17 +83,10 @@ function filterCalendar() {
     filtered = filtered.filter(e => e.date === selectedDate);
   }
 
-  if (selectedEvent !== 'All') {
-    filtered = filtered.filter(e => e.event === selectedEvent);
-  }
-
   renderCalendar(filtered);
 }
 
-window.onload = () => {
-  populateEventFilter();
-  renderCalendar(volunteerData);
-};
+window.onload = () => renderCalendar(volunteerData);
 </script>
 
 </body>
