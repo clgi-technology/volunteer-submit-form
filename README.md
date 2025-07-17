@@ -42,7 +42,8 @@ Volunteer-Submit-Form/
 4. The Action:
    - Appends data to `volunteer_input.yaml`
    - Optionally sends an SMS if enabled
-
+   - Regenerates the calendar page served by GitHub Pages
+   
 ---
 
 ## 📋 Form Fields (via Tally)
@@ -119,16 +120,15 @@ submit:
 ```
 Replace <your-username> with your actual GitHub username or org.
 
-## 🔄 GitHub Action
-The .github/workflows/handle-dispatch.yml workflow:
+## 🔄 GitHub Action  
+The `.github/workflows/handle-dispatch.yml` workflow:
 
-Listens for repository_dispatch events
+- Listens for `repository_dispatch` events  
+- Appends data to `volunteer_input.yaml`  
+- Sends SMS if enabled  
+- Regenerates the calendar page in `docs/`
 
-Appends data to volunteer_input.yaml
-
-Sends SMS if enabled
-
-See full script in .github/workflows/handle-dispatch.yml
+See full script in `.github/workflows/handle-dispatch.yml`.
 
 ## 📄 volunteer_input.yaml Format
 ```
