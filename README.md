@@ -9,18 +9,21 @@ This project collects volunteer availability using a **free Tally form**, and pr
 Volunteer-Submit-Form/
 ├── .github/
 │   └── workflows/
-│       └── handle-dispatch.yml      # Handles repository_dispatch events from make / webhook
+│       ├── send-reminders.yml      # Sends an SMS rmeinder
+│       └── handle-dispatch.yml     # Handles repository_dispatch events from make / webhook
 ├── docs/
-│   ├── calendar.html                # Generated calendar page, served via GitHub Pages
+│   ├── calendar.html               # Generated calendar page, served via GitHub Pages
 │   └── volunteer_schedule.json     # (optional) JSON data for calendar
 ├── scripts/
 │   ├── process_submission.py       # Process and append submissions to volunteer_input.yaml
 │   └── generate_calendar.py        # Generate calendar.html from volunteer_input.yaml
 ├── volunteer_input.yaml            # Stores volunteer data
-├── Makefile                       # Command to send submission payload via curl
-├── README.md                      # Docs and setup info
-├── requirements.txt               # Python dependencies (PyYAML, requests, etc.)
-└── .env                          # For local secrets (optional, not committed)
+├── Makefile                        # Command to send submission payload via curl
+├── send.sms.py                     # Command to send sms if option selected on form
+├── send_reminders.py               # Command to send sms reminders
+├── README.md                       # Docs and setup info
+├── requirements.txt                # Python dependencies (PyYAML, requests, etc.)
+└── .env                            # For local secrets (optional, not committed)
 
 
 ```
