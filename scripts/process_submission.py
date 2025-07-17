@@ -37,21 +37,35 @@ def parse_payload(payload):
     phone = payload.get('phone') or ""
     notify_sms = str(payload.get('notify_sms', '')).lower() in ('true', 'yes', '1')
 
-    date = payload.get('date') or ""
-    time = payload.get('time') or ""
-    roles = payload.get('position_title')
+    shifts = []
 
-    # Handle both string and list for roles
-    if isinstance(roles, str):
-        # Try to split by comma if it's a combined input like "Usher, Greeter"
-        roles = [r.strip() for r in roles.split(',') if r.strip()]
-    elif not isinstance(roles, list):
-        roles = []
+    # Preferred: structured shifts list
+    if 'shifts' in payload and isinstance(payload['shifts'], list):
+        for s in payload['shifts']:
+            date = s.get('date')
+            time = s.get('time')
+            role = s.get('role') or s.get('position_title')
+            if date and time and role:
+                shifts.append({'date': date, 'time': time, 'role': role})
 
-    if not (name and date and time and roles):
-        sys.exit("❌ Missing required volunteer or shift data in payload.")
+    else:
+        # Fallback: single shift
+        date = payload.get('date')
+        time = payload.get('time')
+        roles = payload.get('position_title')
 
-    shifts = [{'date': date, 'time': time, 'role': role} for role in roles]
+        if isinstance(roles, str):
+            roles = [r.strip() for r in roles.split(',') if r.strip()]
+        elif not isinstance(roles, list):
+            roles = []
+
+        for role in roles:
+            if date and time and role:
+                shifts.append({'date': date, 'time': time, 'role': role})
+
+    if not (name and shifts):
+        sys.exit("❌ Missing required volunteer name or shift data.")
+
     return name, phone, notify_sms, shifts
 
 def main():
@@ -78,7 +92,6 @@ def main():
         notify_sms = args.notify_sms
         shifts = []
         for shift_line in args.shifts:
-            # Fallback parsing (e.g., "2025-08-09, 18:00 – Usher")
             try:
                 date_part, rest = shift_line.split(',', 1)
                 time_part, role_part = rest.split('–', 1)
@@ -91,11 +104,11 @@ def main():
                 continue
 
     if not shifts:
-        sys.exit("❌ No valid shifts could be parsed.")
+        sys.exit("❌ No valid shifts found.")
 
     schedule = load_schedule()
 
-    # Remove any existing entries for this volunteer (match by name and phone)
+    # Remove duplicates for same volunteer (optional logic)
     schedule = [v for v in schedule if not (v.get('name') == name and v.get('phone') == phone)]
 
     new_volunteer = {
