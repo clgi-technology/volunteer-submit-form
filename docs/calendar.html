@@ -55,8 +55,10 @@
 </div>
 
 <script>
+// Store all volunteer shifts from JSON
 let volunteerData = [];
 
+// Load volunteer_schedule.json and render calendar
 fetch('volunteer_schedule.json')
   .then(response => {
     if (!response.ok) throw new Error('Failed to load JSON');
@@ -67,9 +69,11 @@ fetch('volunteer_schedule.json')
     renderCalendar(volunteerData);
   })
   .catch(error => {
-    document.getElementById('calendar-body').innerHTML = `<tr><td colspan="5" style="color:red;">${error.message}</td></tr>`;
+    document.getElementById('calendar-body').innerHTML = 
+      `<tr><td colspan="5" style="color:red;">${error.message}</td></tr>`;
   });
 
+// Render table rows for given data
 function renderCalendar(data) {
   const tbody = document.getElementById('calendar-body');
   tbody.innerHTML = '';
@@ -86,6 +90,7 @@ function renderCalendar(data) {
   });
 }
 
+// Filter the calendar by date, role, and event text
 function filterCalendar() {
   const selectedRole = document.getElementById('role-filter').value;
   const selectedDate = document.getElementById('date-filter').value;
