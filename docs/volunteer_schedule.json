@@ -3,36 +3,42 @@
     "date": "2025-07-07",
     "time": "18:00",
     "volunteer": "John Doe",
-    "role": "Usher"
+    "role": "Usher",
+    "event": "Summer Service"
   },
   {
     "date": "2025-07-09",
     "time": "09:00",
     "volunteer": "John Doe",
-    "role": "Greeter"
+    "role": "Greeter",
+    "event": "Summer Service"
   },
   {
     "date": "2025-07-12",
     "time": "14:00",
     "volunteer": "Jane Smith",
-    "role": "Reader"
+    "role": "Reader",
+    "event": "Missions Conference"
   },
   {
     "date": "2025-07-12",
     "time": "23:00",
     "volunteer": "John Doe",
-    "role": "Usher"
+    "role": "Usher",
+    "event": "Missions Conference"
   },
   {
     "date": "2025-07-12",
     "time": "23:00",
     "volunteer": "John Doe",
-    "role": "Greeter"
+    "role": "Greeter",
+    "event": "Missions Conference"
   },
   {
     "date": "2025-07-22",
     "time": "18:00",
     "volunteer": "Jane Doe",
-    "role": "Usher"
+    "role": "Usher",
+    "event": "Summer Service"
   }
 ]
