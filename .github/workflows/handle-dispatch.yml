@@ -19,12 +19,17 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install clicksend-client pyyaml
+          python -m pip install --upgrade pip
+          pip install pyyaml clicksend-client
+
+      - name: Convert payload to compact JSON
+        id: json
+        run: |
+          echo '${{ toJson(github.event.client_payload) }}' | jq -c '.' > payload.json
 
       - name: Process submission and update volunteer_input.yaml
         run: |
-          echo '${{ toJson(github.event.client_payload) }}' > payload.json
-          python scripts/process_submission.py --payload-json payload.json
+          python scripts/process_submission.py --payload-json "$(cat payload.json)"
 
       - name: Regenerate calendar page
         run: |
@@ -38,7 +43,7 @@ jobs:
           git commit -m "Update volunteer data and calendar" || echo "No changes to commit"
           git push
 
-      - name: Send SMS Notification (if phone provided and notify_sms is true)
+      - name: Send SMS Notification (if opted in)
         if: ${{ github.event.client_payload.phone != '' && github.event.client_payload.notify_sms == 'true' }}
         env:
           CLICKSEND_USERNAME: ${{ secrets.CLICKSEND_USERNAME }}
