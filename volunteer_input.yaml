@@ -26,3 +26,31 @@
     role: Usher
     event: Youth Conference
   notify_sms: true
+- name: Jane Doe
+  phone: '+15127855597'
+  shifts:
+  - date: '2025-08-01'
+    time: '10:00'
+    role: Livestream
+    event: Youth Conference
+  - date: '2025-08-01'
+    time: '10:00'
+    role: Usher
+    event: Youth Conference
+  - date: '2025-08-02'
+    time: '10:00'
+    role: Livestream
+    event: Youth Conference
+  - date: '2025-08-02'
+    time: '10:00'
+    role: Usher
+    event: Youth Conference
+  - date: '2025-08-03'
+    time: '10:00'
+    role: Livestream
+    event: Youth Conference
+  - date: '2025-08-03'
+    time: '10:00'
+    role: Usher
+    event: Youth Conference
+  notify_sms: true
