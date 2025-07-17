@@ -2,7 +2,7 @@ import sys
 import argparse
 import yaml
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 SCHEDULE_YAML = 'volunteer_input.yaml'
 SCHEDULE_JSON = 'docs/volunteer_schedule.json'
@@ -28,10 +28,14 @@ def export_json(schedule):
                 "time": shift.get('time'),
                 "volunteer": vol.get('name'),
                 "role": shift.get('role'),
-                "event": shift.get('event') or ""   # Include event name, fallback empty string
+                "event": shift.get('event') or ""
             })
     with open(SCHEDULE_JSON, 'w') as f:
         json.dump(json_data, f, indent=2)
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days) + 1):
+        yield start_date + timedelta(n)
 
 def parse_payload(payload):
     name = payload.get('volunteer_name') or payload.get('name') or ""
@@ -51,8 +55,10 @@ def parse_payload(payload):
                 shifts.append({'date': date, 'time': time, 'role': role, 'event': event})
 
     else:
-        # Fallback: single shift with possibly multiple roles comma-separated
-        date = payload.get('date')
+        # Handle start_date and end_date range
+        start_date_str = payload.get('start_date')
+        end_date_str = payload.get('end_date')
+
         time = payload.get('time')
         roles = payload.get('position_title')
         event = payload.get('event_name') or ""
@@ -62,9 +68,20 @@ def parse_payload(payload):
         elif not isinstance(roles, list):
             roles = []
 
-        for role in roles:
-            if date and time and role:
-                shifts.append({'date': date, 'time': time, 'role': role, 'event': event})
+        if start_date_str and end_date_str and time and roles:
+            try:
+                start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+                end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+            except ValueError:
+                sys.exit("❌ Invalid date format for start_date or end_date. Use YYYY-MM-DD.")
+
+            for single_date in daterange(start_date, end_date):
+                date_str = single_date.isoformat()
+                for role in roles:
+                    shifts.append({'date': date_str, 'time': time, 'role': role, 'event': event})
+
+        else:
+            sys.exit("❌ Missing required date range, time, or roles.")
 
     if not (name and shifts):
         sys.exit("❌ Missing required volunteer name or shift data.")
