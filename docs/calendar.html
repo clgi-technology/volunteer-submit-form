@@ -72,8 +72,8 @@ function renderCalendar(data) {
     row.innerHTML = `
       <td>${entry.date}</td>
       <td>${entry.time}</td>
-      <td>${entry.volunteer_name}</td>
-      <td>${entry.position_title}</td>
+      <td>${entry.volunteer}</td>
+      <td>${entry.role}</td>
     `;
     tbody.appendChild(row);
   });
@@ -85,7 +85,7 @@ function filterCalendar() {
   let filtered = volunteerData;
 
   if (selectedRole !== 'All') {
-    filtered = filtered.filter(e => e.position_title === selectedRole);
+    filtered = filtered.filter(e => e.role === selectedRole);
   }
   if (selectedDate) {
     filtered = filtered.filter(e => e.date === selectedDate);
