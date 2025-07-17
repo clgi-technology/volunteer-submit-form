@@ -1,26 +1,27 @@
 # 🙌 Volunteer Submit Form
 
-This project collects volunteer availability using a **free Tally form**, and processes each submission via a local `make` command that sends data directly to GitHub using the `repository_dispatch` API. GitHub Actions then appends the data to a YAML file and (optionally) sends an SMS reminder using ClickSend.
+This project collects volunteer availability using a **free Tally form**, and processes each submission via a local `make` command that sends data directly to GitHub using the `repository_dispatch` API. GitHub Actions then appends the data to a YAML file, submits data to a calendar via github pages and (optionally) sends an SMS reminder using ClickSend.
 
 ---
 ## Directory Tree
 
 ```
-volunteer-submit-form/
+Volunteer-Submit-Form/
 ├── .github/
 │   └── workflows/
-│       └── handle-dispatch.yml
+│       └── handle-dispatch.yml      # Handles repository_dispatch events from make / webhook
+├── docs/
+│   ├── calendar.html                # Generated calendar page, served via GitHub Pages
+│   └── volunteer_schedule.json     # (optional) JSON data for calendar
 ├── scripts/
-│   ├── process_submission.py
-│   ├── send_clicksend_sms.py
-│   └── generate_calendar.py    ◀️ NEW
-├── calendar_output/
-│   └── calendar.html           ◀️ Output for SharePoint
-├── volunteer_input.yaml
-├── Makefile
-├── payload.json
-├── requirements.txt
-└── README.md
+│   ├── process_submission.py       # Process and append submissions to volunteer_input.yaml
+│   └── generate_calendar.py        # Generate calendar.html from volunteer_input.yaml
+├── volunteer_input.yaml            # Stores volunteer data
+├── Makefile                       # Command to send submission payload via curl
+├── README.md                      # Docs and setup info
+├── requirements.txt               # Python dependencies (PyYAML, requests, etc.)
+└── .env                          # For local secrets (optional, not committed)
+
 
 ```
 
